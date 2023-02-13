@@ -1,17 +1,17 @@
 from sqlalchemy.orm import Session
-
-from . import models
-
-
-def get_document_by_id(db: Session, document_id: int):
-    return db.query(models.Document).filter(models.Document.id == document_id).first()
+import models
 
 
-def get_documents(db: Session, skip: int = 0, limit: int = 20):
-    return db.query(models.Document).offset(skip).limit(limit).all()
+def get_posts_by_ids(db: Session, posts_ids: list, skip: int = 0, limit: int = 20):
+    return db.query(models.Post).filter(models.Post.id.in_(posts_ids)).order_by(models.Post.created_date).offset(skip).limit(20).all()
 
 
-def remove_document_by_id(db: Session, document_id: int):
-    db.query(models.Document).filter(models.Document.id == document_id).delete()
+def get_post_by_id(db: Session, post_id: int):
+    return db.query(models.Post).filter(models.Post.id == post_id).first()
+
+
+def delete_post_by_id(db: Session, post_id: int):
+    db.query(models.Post).filter(models.Post.id == post_id).delete()
     return db.commit()
+
 

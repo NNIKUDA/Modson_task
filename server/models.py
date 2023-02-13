@@ -1,19 +1,18 @@
 from sqlalchemy import Table, Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .database import Base, engine
+from database import Base, engine
 
 
-class Document(Base):
+class Post(Base):
     __table__ = Table(
-        "docs",
+        "posts",
         Base.metadata,
         autoload_with=engine,
     )
 
-    def __init__(self, id, text, date_of_writing, rubrics):
+    def __init__(self, id, text, created_date, rubrics):
         self.id = id
         self.text = text
-        self.date_if_writing = date_of_writing
+        self.created_date = created_date
         self.rubrics = rubrics
-
