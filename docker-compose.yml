@@ -1,0 +1,59 @@
+version: '3.1'
+
+services:
+ es:
+  container_name: es
+  image: elasticsearch:8.6.1
+  ports:
+   - "9200:9200"
+   - "9300-9300"
+  environment:
+   - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+   - discovery.type=single-node
+   - xpack.security.http.ssl.enabled=False
+  healthcheck:
+   test: curl -u elastic:elastic localhost:9200
+   interval: 2s
+   retries: 1000
+   
+ db:
+  container_name: db
+  image: postgres:latest
+  environment:
+   - POSTGRES_USER=${POSTGRES_USER}
+   - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+   - POSTGRES_DB=${POSTGRES_DB}
+  ports:
+   - "5432:5432"
+  restart: always
+  healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      interval: 1s
+      retries: 100
+      
+
+ server:
+  container_name: fastapi_server
+  build: .
+  ports:
+   - "8000:8000"
+  command: bash -c "python /code/utils/loader.py && uvicorn main:app --host 0.0.0.0 --port 8000"
+  environment:
+   - POSTGRES_HOST=db
+   - POSTGRES_USER=${POSTGRES_USER}
+   - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+   - POSTGRES_DB=${POSTGRES_DB}
+   - POSTS_PATH=/code/utils/posts.csv
+   - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+   - ELASTIC_HOST=es
+  depends_on:
+   db:
+    condition: service_healthy
+   es:
+    condition: service_healthy
+
+
+    
+   
+    
+
